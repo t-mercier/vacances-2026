@@ -3,14 +3,12 @@
    encode tes votes/notes dans une URL ; l'ouvrir chez quelqu'un
    d'autre fusionne tes votes dans sa vue. Pas de backend. */
 
-const LS = {
-  user: "hv_user", votes: "hv_votes", notes: "hv_notes", custom: "hv_custom"
-};
+const LS = { user: "hv_user", votes: "hv_votes", notes: "hv_notes" };
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-// n'autorise que http(s) — bloque javascript: etc. (formulaire d'ajout & liens partagés)
+// n'autorise que http(s) — bloque javascript: etc.
 const safeUrl = u => { try { const p = new URL(u); return ["http:", "https:"].includes(p.protocol) ? u : "#"; } catch { return "#"; } };
 
 /* Couleur stable par région (palette dopamine, index par ordre d'apparition) */
@@ -45,11 +43,10 @@ const perkLabel = p => {
 
 let votes = load(LS.votes, {});     // {listingId: [prenoms]}
 let notes = load(LS.notes, {});     // {listingId: [{who,text,ts}]}
-let custom = load(LS.custom, []);   // biens ajoutés localement
 let region = "Toutes";
 let mapObj = null;
 
-const all = () => [...LISTINGS, ...custom];
+const all = () => LISTINGS;
 const me = () => (document.getElementById("me-name").value || "").trim();
 
 /* ─── Fusion depuis une URL partagée (#d=…) ─── */
@@ -66,10 +63,7 @@ const me = () => (document.getElementById("me-name").value || "").trim();
       const seen = new Set(mine.map(n => n.ts + "|" + n.who));
       notes[id] = [...mine, ...list.filter(n => !seen.has(n.ts + "|" + n.who))];
     }
-    for (const c of shared.custom || []) {
-      if (!all().some(l => l.id === c.id)) custom.push(c);
-    }
-    save(LS.votes, votes); save(LS.notes, notes); save(LS.custom, custom);
+    save(LS.votes, votes); save(LS.notes, notes);
     history.replaceState(null, "", location.pathname);
     setTimeout(() => alert("Votes et notes partagés fusionnés dans ta vue ✔"), 300);
   } catch (e) { console.warn("hash invalide", e); }
@@ -92,8 +86,6 @@ function regions() { return ["Toutes", ...new Set(all().map(l => l.region))]; }
 function renderChips() {
   document.getElementById("region-chips").innerHTML = regions().map(r =>
     `<button class="chip ${r === region ? "active" : ""}" data-r="${esc(r)}">${esc(r)}</button>`).join("");
-  document.getElementById("regions").innerHTML =
-    [...new Set(all().map(l => l.region))].map(r => `<option value="${esc(r)}">`).join("");
 }
 
 function sorted(list) {
@@ -222,47 +214,17 @@ document.getElementById("btn-view-map").addEventListener("click", () => {
 });
 
 document.getElementById("btn-share").addEventListener("click", async () => {
-  const payload = { votes, notes, custom };
+  const payload = { votes, notes };
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   const url = location.origin + location.pathname + "#d=" + b64;
   try { await navigator.clipboard.writeText(url); alert("Lien copié 📋 — envoie-le sur le groupe WhatsApp !"); }
   catch { prompt("Copie ce lien :", url); }
 });
 
-/* ─── Ajout d'un bien ─── */
-const dlg = document.getElementById("dlg-add");
-document.getElementById("btn-add").addEventListener("click", () => dlg.showModal());
-document.getElementById("form-add").addEventListener("submit", e => {
-  if (e.submitter?.value !== "ok") return;
-  const f = new FormData(e.target);
-  const idMatch = String(f.get("url")).match(/rooms\/(\d+)/);
-  const l = {
-    id: idMatch ? idMatch[1] : "custom-" + Date.now(),
-    title: f.get("title"), city: f.get("city"), region: f.get("region"),
-    url: f.get("url"),
-    price: f.get("price") ? Number(f.get("price")) : null,
-    checkin: f.get("checkin") || "2026-08-01", checkout: f.get("checkout") || "2026-08-08",
-    guests: Number(f.get("guests")) || "?", bedrooms: Number(f.get("bedrooms")) || "?",
-    baths: "?", rating: f.get("rating") || "",
-    lat: f.get("lat") ? Number(f.get("lat")) : null,
-    lng: f.get("lng") ? Number(f.get("lng")) : null,
-    perks: String(f.get("perks") || "").split(",").map(s => s.trim()).filter(Boolean)
-  };
-  if (all().some(x => x.id === l.id)) { alert("Ce bien est déjà dans la liste !"); return; }
-  custom.push(l); save(LS.custom, custom);
-  e.target.reset(); render();
-});
-
-document.getElementById("btn-export").addEventListener("click", () => {
-  if (!custom.length) { alert("Aucun bien ajouté localement."); return; }
-  prompt("À coller dans listings.js (avant le ]) puis push :",
-    custom.map(c => JSON.stringify(c, null, 2)).join(",\n") + ",");
-});
-
 document.getElementById("btn-reset").addEventListener("click", () => {
   if (!confirm("Effacer TES votes, notes et biens ajoutés (sur cet appareil) ?")) return;
-  localStorage.removeItem(LS.votes); localStorage.removeItem(LS.notes); localStorage.removeItem(LS.custom);
-  votes = {}; notes = {}; custom = []; render();
+  localStorage.removeItem(LS.votes); localStorage.removeItem(LS.notes);
+  votes = {}; notes = {}; render();
 });
 
 /* ─── Init ─── */
