@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vacances 2026 — le vote 🏖️</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏖️</text></svg>">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="head-row">
+      <h1>🏖️ Vacances 2026 — on vote !</h1>
+      <div class="me">
+        <label for="me-name">Je suis</label>
+        <input id="me-name" type="text" placeholder="ton prénom" maxlength="20">
+      </div>
+    </div>
+    <p class="sub">Semaine du 1<sup>er</sup>–9 août · 7 adultes + 4 enfants · budget ~5 500 €.
+      ❤️ vote pour tes préférés, 📝 laisse des notes, puis <button class="linklike" id="btn-share">partage ton vote</button> aux autres.</p>
+  </header>
+
+  <nav class="toolbar">
+    <div class="chips" id="region-chips"></div>
+    <div class="tools">
+      <select id="sort">
+        <option value="votes">Tri : ❤️ votes</option>
+        <option value="price">Tri : prix ↑</option>
+        <option value="rating">Tri : note Airbnb</option>
+      </select>
+      <button id="btn-view-map" class="btn">🗺️ Carte</button>
+      <button id="btn-add" class="btn btn-primary">＋ Ajouter un bien</button>
+    </div>
+  </nav>
+
+  <div id="map-wrap" class="hidden"><div id="map"></div></div>
+  <main id="cards"></main>
+
+  <!-- Dialog ajout -->
+  <dialog id="dlg-add">
+    <form method="dialog" id="form-add">
+      <h2>Ajouter un bien</h2>
+      <label>Lien Airbnb * <input required name="url" type="url" placeholder="https://www.airbnb.fr/rooms/…"></label>
+      <label>Titre * <input required name="title" placeholder="Villa les Flots Bleus"></label>
+      <div class="grid2">
+        <label>Ville * <input required name="city" placeholder="Cassis"></label>
+        <label>Région * <input required name="region" list="regions" placeholder="Var — côte"></label>
+        <datalist id="regions"></datalist>
+        <label>Prix total (€) <input name="price" type="number" min="0" placeholder="4200"></label>
+        <label>Note Airbnb <input name="rating" placeholder="4,8"></label>
+        <label>Arrivée <input name="checkin" type="date" value="2026-08-01"></label>
+        <label>Départ <input name="checkout" type="date" value="2026-08-08"></label>
+        <label>Voyageurs <input name="guests" type="number" min="1" placeholder="10"></label>
+        <label>Chambres <input name="bedrooms" type="number" min="1" placeholder="5"></label>
+        <label>Lat <input name="lat" type="number" step="any" placeholder="43.53"></label>
+        <label>Lng <input name="lng" type="number" step="any" placeholder="5.44"></label>
+      </div>
+      <label>Avantages (séparés par des virgules)
+        <input name="perks" placeholder="piscine, clim, vue mer, jardin"></label>
+      <p class="hint">💡 lat/lng : clic droit sur Google Maps → premier item du menu. Sans ça, le bien n'apparaît pas sur la carte (mais reste dans la liste).</p>
+      <menu>
+        <button value="cancel" class="btn">Annuler</button>
+        <button value="ok" class="btn btn-primary" id="btn-add-ok">Ajouter</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <footer>
+    <span id="stats"></span> ·
+    <button class="linklike" id="btn-export">Exporter les biens ajoutés (JSON)</button> ·
+    <button class="linklike danger" id="btn-reset">Réinitialiser mes votes/notes</button>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+  <script src="listings.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+/* ─── Vacances 2026 — vote de famille ─────────────────────────────
+   Stockage 100% local (localStorage). Le bouton "partage ton vote"
+   encode tes votes/notes dans une URL ; l'ouvrir chez quelqu'un
+   d'autre fusionne tes votes dans sa vue. Pas de backend. */
+
+const LS = {
+  user: "hv_user", votes: "hv_votes", notes: "hv_notes", custom: "hv_custom"
+};
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// n'autorise que http(s) — bloque javascript: etc. (formulaire d'ajout & liens partagés)
+const safeUrl = u => { try { const p = new URL(u); return ["http:", "https:"].includes(p.protocol) ? u : "#"; } catch { return "#"; } };
+
+/* Couleur stable par région (palette dopamine, index par ordre d'apparition) */
+const REGION_PALETTE = [
+  ["#f3e8ff", "#7c3aed"], // violet
+  ["#ffe4ef", "#e0356f"], // rose
+  ["#fff1dc", "#d97706"], // orange
+  ["#dcf9f4", "#0f9488"], // teal
+  ["#e0edff", "#2563eb"], // bleu
+  ["#fef6d8", "#b45309"], // jaune/ocre
+  ["#ffe8e0", "#dc4a26"], // corail
+  ["#e8f7dc", "#4d7c0f"]  // vert
+];
+const regionStyle = r => {
+  const i = [...new Set(all().map(l => l.region))].indexOf(r);
+  const [bg, fg] = REGION_PALETTE[(i + REGION_PALETTE.length) % REGION_PALETTE.length];
+  return `background:${bg};color:${fg}`;
+};
+
+/* Emoji par avantage — l'info se lit d'un coup d'œil */
+const PERK_EMOJI = [
+  [/piscine/i, "🏊"], [/jacuzzi|spa/i, "🫧"], [/sauna/i, "🧖"], [/clim/i, "❄️"],
+  [/vue mer|mer\b/i, "🌊"], [/vue|panoram/i, "🏞️"], [/jardin/i, "🌿"],
+  [/barbecue/i, "🍖"], [/parking|garage/i, "🅿️"], [/cheminée/i, "🔥"],
+  [/ping-pong/i, "🏓"], [/pétanque/i, "🎯"], [/tennis/i, "🎾"], [/sport/i, "🏋️"],
+  [/éco/i, "♻️"], [/appartement/i, "🏢"], [/hypercentre|ville/i, "🏙️"], [/chauffée/i, "♨️"]
+];
+const perkLabel = p => {
+  const hit = PERK_EMOJI.find(([re]) => re.test(p));
+  return (hit ? hit[1] + " " : "") + p;
+};
+
+let votes = load(LS.votes, {});     // {listingId: [prenoms]}
+let notes = load(LS.notes, {});     // {listingId: [{who,text,ts}]}
+let custom = load(LS.custom, []);   // biens ajoutés localement
+let region = "Toutes";
+let mapObj = null;
+
+const all = () => [...LISTINGS, ...custom];
+const me = () => (document.getElementById("me-name").value || "").trim();
+
+/* ─── Fusion depuis une URL partagée (#d=…) ─── */
+(function mergeFromHash() {
+  const m = location.hash.match(/#d=(.+)/);
+  if (!m) return;
+  try {
+    const shared = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    for (const [id, names] of Object.entries(shared.votes || {})) {
+      votes[id] = [...new Set([...(votes[id] || []), ...names])];
+    }
+    for (const [id, list] of Object.entries(shared.notes || {})) {
+      const mine = notes[id] || [];
+      const seen = new Set(mine.map(n => n.ts + "|" + n.who));
+      notes[id] = [...mine, ...list.filter(n => !seen.has(n.ts + "|" + n.who))];
+    }
+    for (const c of shared.custom || []) {
+      if (!all().some(l => l.id === c.id)) custom.push(c);
+    }
+    save(LS.votes, votes); save(LS.notes, notes); save(LS.custom, custom);
+    history.replaceState(null, "", location.pathname);
+    setTimeout(() => alert("Votes et notes partagés fusionnés dans ta vue ✔"), 300);
+  } catch (e) { console.warn("hash invalide", e); }
+})();
+
+/* ─── Rendu ─── */
+function fmtDates(l) {
+  const f = d => new Date(d + "T12:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  const nights = Math.round((new Date(l.checkout) - new Date(l.checkin)) / 864e5);
+  return `${f(l.checkin)} → ${f(l.checkout)} · ${nights} nuits`;
+}
+function priceHtml(l) {
+  if (l.price == null) return `<span class="price unknown">prix à vérifier</span>`;
+  const over = l.price > BUDGET_MAX;
+  return `<span class="price ${over ? "over" : ""}">${l.price.toLocaleString("fr-FR")} €</span>` +
+    (over ? ` <span class="dates">⚠ au-dessus des ${BUDGET_MAX.toLocaleString("fr-FR")} €</span>` : "");
+}
+function regions() { return ["Toutes", ...new Set(all().map(l => l.region))]; }
+
+function renderChips() {
+  document.getElementById("region-chips").innerHTML = regions().map(r =>
+    `<button class="chip ${r === region ? "active" : ""}" data-r="${esc(r)}">${esc(r)}</button>`).join("");
+  document.getElementById("regions").innerHTML =
+    [...new Set(all().map(l => l.region))].map(r => `<option value="${esc(r)}">`).join("");
+}
+
+function sorted(list) {
+  const mode = document.getElementById("sort").value;
+  const v = l => (votes[l.id] || []).length;
+  const r = l => parseFloat(String(l.rating || "0").replace(",", "."));
+  return [...list].sort((a, b) =>
+    mode === "price" ? (a.price ?? 1e9) - (b.price ?? 1e9) :
+    mode === "rating" ? r(b) - r(a) : v(b) - v(a));
+}
+
+function render() {
+  renderChips();
+  const list = sorted(all().filter(l => region === "Toutes" || l.region === region));
+  const maxVotes = Math.max(0, ...all().map(l => (votes[l.id] || []).length));
+  document.getElementById("cards").innerHTML = list.map(l => {
+    const vs = votes[l.id] || [];
+    const ns = notes[l.id] || [];
+    const iVoted = vs.includes(me());
+    const isWinner = maxVotes > 0 && vs.length === maxVotes;
+    return `
+    <article class="card ${isWinner ? "winner" : ""}" data-id="${esc(l.id)}">
+      <div class="badge-row">
+        <span class="region-badge" style="${regionStyle(l.region)}">📍 ${esc(l.region)}</span>
+        ${isWinner ? '<span class="crown" title="en tête des votes">👑</span>' : ""}
+      </div>
+      <h3><a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener noreferrer">${esc(l.title)} ↗</a></h3>
+      <div class="meta">
+        <span>🏘 ${esc(l.city)}</span>
+        <span>👥 ${esc(l.guests)} voy. · 🛏 ${esc(l.bedrooms)} ch. · 🛁 ${esc(l.baths)} sdb</span>
+        ${l.rating ? `<span>⭐ ${esc(l.rating)}</span>` : ""}
+      </div>
+      <div class="price-row">${priceHtml(l)} <span class="dates">📅 ${fmtDates(l)}</span></div>
+      <div class="perks">${(l.perks || []).map(p => `<span class="perk">${esc(perkLabel(p))}</span>`).join("")}</div>
+      <div class="vote-row">
+        <button class="btn-vote ${iVoted ? "voted" : ""}" data-vote="${esc(l.id)}">
+          ${iVoted ? "❤️" : "🤍"} ${vs.length}</button>
+        <span class="voters">${vs.length ? esc(vs.join(", ")) : "aucun vote"}</span>
+      </div>
+      <details class="notes" ${ns.length ? "open" : ""}>
+        <summary>📝 Notes (${ns.length})</summary>
+        ${ns.map(n => `<div class="note"><b>${esc(n.who)}</b> — ${esc(n.text)}
+          <span class="when">${new Date(n.ts).toLocaleDateString("fr-FR")}</span></div>`).join("")}
+        <form class="note-form" data-note="${esc(l.id)}">
+          <input placeholder="ta remarque…" maxlength="300" required>
+          <button class="btn">OK</button>
+        </form>
+      </details>
+    </article>`;
+  }).join("");
+  const total = all().length;
+  const voters = new Set(Object.values(votes).flat());
+  document.getElementById("stats").textContent =
+    `${total} biens · ${voters.size} votant·e·s (${[...voters].join(", ") || "personne"})`;
+  if (mapObj) renderMarkers();
+}
+
+/* ─── Carte ─── */
+function ensureMap() {
+  if (mapObj) return;
+  mapObj = L.map("map").setView([44.3, 5.5], 6);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(mapObj);
+  renderMarkers();
+}
+let markerLayer = null;
+function renderMarkers() {
+  if (markerLayer) markerLayer.remove();
+  markerLayer = L.layerGroup().addTo(mapObj);
+  const pts = [];
+  for (const l of all()) {
+    if (l.lat == null || l.lng == null) continue;
+    pts.push([l.lat, l.lng]);
+    const vs = (votes[l.id] || []).length;
+    L.marker([l.lat, l.lng]).addTo(markerLayer).bindPopup(
+      `<div class="popup-title">${esc(l.title)}</div>` +
+      `${l.price != null ? l.price.toLocaleString("fr-FR") + " €" : "prix à vérifier"} · ❤️ ${vs}<br>` +
+      `<a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener noreferrer">Voir sur Airbnb ↗</a>`);
+  }
+  if (pts.length) mapObj.fitBounds(pts, { padding: [40, 40] });
+}
+
+/* ─── Événements ─── */
+document.addEventListener("click", e => {
+  const chip = e.target.closest(".chip");
+  if (chip) { region = chip.dataset.r; render(); return; }
+  const voteBtn = e.target.closest("[data-vote]");
+  if (voteBtn) {
+    const name = me();
+    if (!name) { alert("Écris ton prénom en haut à droite d'abord 🙂"); document.getElementById("me-name").focus(); return; }
+    const id = voteBtn.dataset.vote;
+    const vs = votes[id] || [];
+    votes[id] = vs.includes(name) ? vs.filter(n => n !== name) : [...vs, name];
+    save(LS.votes, votes); render();
+  }
+});
+
+document.addEventListener("submit", e => {
+  const form = e.target.closest("[data-note]");
+  if (!form) return;
+  e.preventDefault();
+  const name = me();
+  if (!name) { alert("Écris ton prénom en haut à droite d'abord 🙂"); return; }
+  const text = form.querySelector("input").value.trim();
+  if (!text) return;
+  const id = form.dataset.note;
+  (notes[id] = notes[id] || []).push({ who: name, text, ts: Date.now() });
+  save(LS.notes, notes); render();
+});
+
+document.getElementById("sort").addEventListener("change", render);
+
+document.getElementById("me-name").addEventListener("change", e => {
+  save(LS.user, e.target.value.trim()); render();
+});
+
+document.getElementById("btn-view-map").addEventListener("click", () => {
+  const wrap = document.getElementById("map-wrap");
+  wrap.classList.toggle("hidden");
+  document.getElementById("btn-view-map").textContent =
+    wrap.classList.contains("hidden") ? "🗺️ Carte" : "🗂 Masquer la carte";
+  if (!wrap.classList.contains("hidden")) { ensureMap(); setTimeout(() => mapObj.invalidateSize(), 60); }
+});
+
+document.getElementById("btn-share").addEventListener("click", async () => {
+  const payload = { votes, notes, custom };
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const url = location.origin + location.pathname + "#d=" + b64;
+  try { await navigator.clipboard.writeText(url); alert("Lien copié 📋 — envoie-le sur le groupe WhatsApp !"); }
+  catch { prompt("Copie ce lien :", url); }
+});
+
+/* ─── Ajout d'un bien ─── */
+const dlg = document.getElementById("dlg-add");
+document.getElementById("btn-add").addEventListener("click", () => dlg.showModal());
+document.getElementById("form-add").addEventListener("submit", e => {
+  if (e.submitter?.value !== "ok") return;
+  const f = new FormData(e.target);
+  const idMatch = String(f.get("url")).match(/rooms\/(\d+)/);
+  const l = {
+    id: idMatch ? idMatch[1] : "custom-" + Date.now(),
+    title: f.get("title"), city: f.get("city"), region: f.get("region"),
+    url: f.get("url"),
+    price: f.get("price") ? Number(f.get("price")) : null,
+    checkin: f.get("checkin") || "2026-08-01", checkout: f.get("checkout") || "2026-08-08",
+    guests: Number(f.get("guests")) || "?", bedrooms: Number(f.get("bedrooms")) || "?",
+    baths: "?", rating: f.get("rating") || "",
+    lat: f.get("lat") ? Number(f.get("lat")) : null,
+    lng: f.get("lng") ? Number(f.get("lng")) : null,
+    perks: String(f.get("perks") || "").split(",").map(s => s.trim()).filter(Boolean)
+  };
+  if (all().some(x => x.id === l.id)) { alert("Ce bien est déjà dans la liste !"); return; }
+  custom.push(l); save(LS.custom, custom);
+  e.target.reset(); render();
+});
+
+document.getElementById("btn-export").addEventListener("click", () => {
+  if (!custom.length) { alert("Aucun bien ajouté localement."); return; }
+  prompt("À coller dans listings.js (avant le ]) puis push :",
+    custom.map(c => JSON.stringify(c, null, 2)).join(",\n") + ",");
+});
+
+document.getElementById("btn-reset").addEventListener("click", () => {
+  if (!confirm("Effacer TES votes, notes et biens ajoutés (sur cet appareil) ?")) return;
+  localStorage.removeItem(LS.votes); localStorage.removeItem(LS.notes); localStorage.removeItem(LS.custom);
+  votes = {}; notes = {}; custom = []; render();
+});
+
+/* ─── Init ─── */
+document.getElementById("me-name").value = load(LS.user, "");
+render();
