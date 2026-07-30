@@ -52,6 +52,24 @@ const LISTINGS = [
     rating: "9,5",
     lat: 45.6673658, lng: 5.1397074,
     perks: ["piscine privée", "clim", "jardin", "balcon", "parking", "250 m²"]
+  },
+  {
+    id: "9357886",
+    driveH: 6.6, driveKm: 622,
+    lyonH: 2.0, lyonKm: 171,
+    poi: [{ e: "🍷", n: "Château de Grignan", m: 8 }, { e: "👶", n: "Ferme aux crocodiles, Pierrelatte", m: 20 }, { e: "👶", n: "Palais idéal du Facteur Cheval", m: 63 }],
+    img: "img/9357886.jpg",
+    fav: true,
+    title: "La Salamandre Bleue",
+    city: "Chantemerle-lès-Grignan (Drôme)",
+    region: "Drôme provençale",
+    url: "https://www.airbnb.fr/rooms/9357886?check_in=2026-08-01&check_out=2026-08-08&adults=7&children=3",
+    price: 2342,
+    checkin: "2026-08-01", checkout: "2026-08-08",
+    guests: 12, bedrooms: 5, baths: "3,5",
+    rating: "4,96",
+    lat: 44.40362, lng: 4.83475,
+    perks: ["piscine privée", "jacuzzi", "cheminée", "pétanque"]
   }
 ];
 const BUDGET_MAX = 4000;
