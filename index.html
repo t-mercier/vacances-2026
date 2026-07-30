@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏖️</text></svg>">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <header>
@@ -19,7 +19,8 @@
       </div>
     </div>
     <p class="sub">Semaine du 1<sup>er</sup>–9 août · 7 adultes + 4 enfants · budget ~4 500 €.
-      ❤️ vote pour tes préférés, 📝 laisse des notes, puis <button class="linklike" id="btn-share">partage ton vote</button> aux autres.</p>
+      ❤️ vote pour tes préférés, 📝 laisse des notes, 🙈 masque ce qui ne te tente pas, puis <button class="linklike" id="btn-share">partage ton vote</button> aux autres.<br>
+      <small>🚗 temps de route depuis Bordeaux, hors bouchons d'août · ✈️ uniquement les lignes directes depuis Bordeaux, transfert jusqu'au logement compris.</small></p>
   </header>
 
   <nav class="toolbar">
@@ -28,6 +29,7 @@
       <select id="sort">
         <option value="votes">Tri : ❤️ votes</option>
         <option value="price">Tri : prix ↑</option>
+        <option value="drive">Tri : 🚗 route ↑</option>
         <option value="rating">Tri : note Airbnb</option>
       </select>
       <button id="btn-view-map" class="btn">🗺️ Carte</button>
@@ -39,12 +41,13 @@
 
   <footer>
     <span id="stats"></span> ·
+    <button class="linklike hidden" id="btn-unhide"></button> ·
     <button class="linklike danger" id="btn-reset">Réinitialiser mes votes/notes</button>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
-  <script src="listings.js"></script>
-  <script src="app.js"></script>
+  <script src="listings.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

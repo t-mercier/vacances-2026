@@ -1,9 +1,11 @@
 // ─── Les logements ───────────────────────────────────────────────
-// Pour ajouter un bien de façon permanente : copier un bloc, l'adapter,
-// et push. (Sinon, bouton "+ Ajouter" sur le site → stockage local + export JSON.)
+// Curation via push : envoyer les liens Airbnb à Tim, elle scrape et met à jour.
+// `fav: true` = élu « Coup de cœur voyageurs » par Airbnb.
 const LISTINGS = [
   {
     id: "31921420",
+    driveH: 7.1, driveKm: 647,
+    fly: { to: "Marseille", h: 1.15, road: 138 },
     img: "img/31921420.jpg",
     title: "Gîte de charme — vue exceptionnelle & spa",
     city: "Montréal-les-Sources",
@@ -17,35 +19,9 @@ const LISTINGS = [
     perks: ["piscine", "spa", "jacuzzi", "vue panoramique", "jardin", "barbecue", "cheminée", "ping-pong"]
   },
   {
-    id: "1170421735447933869",
-    img: "img/1170421735447933869.jpg",
-    title: "Villa l'Arbanaise — vue mer, presqu'île de Giens",
-    city: "Hyères",
-    region: "Var — côte",
-    url: "https://www.airbnb.fr/rooms/1170421735447933869?check_in=2026-08-02&check_out=2026-08-07&guests=8&adults=7&children=1&infants=2",
-    price: 3981,
-    checkin: "2026-08-02", checkout: "2026-08-07",
-    guests: 10, bedrooms: 5, baths: "4",
-    rating: "4,3",
-    lat: 43.03765, lng: 6.10861,
-    perks: ["piscine", "vue mer", "clim", "jardin", "barbecue"]
-  },
-  {
-    id: "1739140052901104186",
-    img: "img/1739140052901104186.jpg",
-    title: "Villa d'architecte avec piscine privée",
-    city: "Six-Fours-les-Plages",
-    region: "Var — côte",
-    url: "https://www.airbnb.fr/rooms/1739140052901104186?check_in=2026-08-01&check_out=2026-08-07&guests=8&adults=7&children=1&infants=2",
-    price: 3859,
-    checkin: "2026-08-01", checkout: "2026-08-07",
-    guests: 8, bedrooms: 4, baths: "3",
-    rating: "4,0",
-    lat: 43.08412, lng: 5.82771,
-    perks: ["piscine privée", "clim", "parking"]
-  },
-  {
     id: "919375358132572747",
+    driveH: 5.9, driveKm: 568,
+    fly: { to: "Marseille", h: 1.15, road: 69 },
     img: "img/919375358132572747.jpg",
     title: "Anatole — cadre idyllique avec piscine",
     city: "Les Angles (face Avignon)",
@@ -60,6 +36,8 @@ const LISTINGS = [
   },
   {
     id: "1000703526294624122",
+    driveH: 8.2, driveKm: 790,
+    fly: { to: "Nice", h: 1.35, road: 51 },
     img: "img/1000703526294624122.jpg",
     title: "Villa à Grasse — piscine, vieille ville à pied",
     city: "Grasse",
@@ -74,7 +52,10 @@ const LISTINGS = [
   },
   {
     id: "8979070",
+    driveH: 6.6, driveKm: 632,
+    fly: { to: "Marseille", h: 1.15, road: 32 },
     img: "img/8979070.jpg",
+    fav: true,
     title: "Maison hypercentre — clim, piscine, pétanque",
     city: "Aix-en-Provence",
     region: "Provence — Aix",
@@ -88,10 +69,12 @@ const LISTINGS = [
   },
   {
     id: "546681176260395984",
+    driveH: 8.2, driveKm: 768,
+    fly: { to: "Genève", h: 1.35, road: 79 },
     img: "img/546681176260395984.jpg",
     title: "Chalet vallée de Chamonix — piscine, spa, sauna, salle de sport",
     city: "Servoz",
-    region: "Alpes — Chamonix",
+    region: "Alpes",
     url: "https://www.airbnb.fr/rooms/546681176260395984?check_in=2026-08-01&check_out=2026-08-08&guests=8&adults=7&children=1&infants=2",
     price: null, // ne s'affichait pas — à vérifier sur Airbnb
     checkin: "2026-08-01", checkout: "2026-08-08",
@@ -101,22 +84,11 @@ const LISTINGS = [
     perks: ["piscine", "spa", "sauna", "jacuzzi", "salle de sport", "jardin", "parking"]
   },
   {
-    id: "43332322",
-    img: "img/43332322.jpg",
-    title: "Villa contemporaine — piscine chauffée",
-    city: "Saint-Cyr-sur-Mer",
-    region: "Var — côte",
-    url: "https://www.airbnb.fr/rooms/43332322?check_in=2026-08-01&check_out=2026-08-08&guests=8&adults=7&children=1&infants=2",
-    price: 5047,
-    checkin: "2026-08-01", checkout: "2026-08-08",
-    guests: 10, bedrooms: 4, baths: "4",
-    rating: "4,88",
-    lat: 43.18935, lng: 5.68322,
-    perks: ["piscine chauffée", "clim", "barbecue", "parking"]
-  },
-  {
     id: "54143335",
+    driveH: 5.2, driveKm: 503,
+    fly: { to: "Marseille", h: 1.15, road: 108 },
     img: "img/54143335.jpg",
+    fav: true,
     title: "Le Majestic Mind — vue mer d'exception",
     city: "La Grande-Motte",
     region: "Occitanie — mer",
@@ -130,7 +102,10 @@ const LISTINGS = [
   },
   {
     id: "857816540820477764",
+    driveH: 5.6, driveKm: 538,
+    fly: { to: "Marseille", h: 1.15, road: 88 },
     img: "img/857816540820477764.jpg",
+    fav: true,
     title: "Mas le Garric — lieu éco-responsable",
     city: "Nîmes",
     region: "Gard / Avignon",
@@ -144,7 +119,10 @@ const LISTINGS = [
   },
   {
     id: "9357886",
+    driveH: 6.6, driveKm: 622,
+    fly: { to: "Marseille", h: 1.15, road: 105 },
     img: "img/9357886.jpg",
+    fav: true,
     title: "La Salamandre Bleue",
     city: "Chantemerle-lès-Grignan",
     region: "Drôme provençale",
@@ -158,6 +136,8 @@ const LISTINGS = [
   },
   {
     id: "619372808921130995",
+    driveH: 9.4, driveKm: 896,
+    fly: { to: "Nice", h: 1.35, road: 91 },
     img: "img/619372808921130995.jpg",
     title: "Villa La Rodina — usage exclusif, 12 personnes",
     city: "Diano Marina",
@@ -169,6 +149,164 @@ const LISTINGS = [
     rating: "4,9",
     lat: 43.91892, lng: 8.09063,
     perks: ["piscine", "jacuzzi", "clim", "jardin", "barbecue", "parking"]
+  },
+  {
+    id: "1425224659152322709",
+    driveH: 3.8, driveKm: 341,
+    img: "img/1425224659152322709.jpg",
+    fav: true,
+    title: "Magnifique maison rénovée",
+    city: "Avoine (près Chinon)",
+    region: "Val de Loire",
+    url: "https://www.airbnb.fr/rooms/1425224659152322709?check_in=2026-08-02&check_out=2026-08-08&guests=1&adults=7&children=3",
+    price: 4798,
+    checkin: "2026-08-02", checkout: "2026-08-08",
+    guests: 15, bedrooms: 6, baths: "6",
+    rating: "5,0",
+    lat: 47.2061, lng: 0.1846,
+    perks: ["piscine", "clim", "parking"]
+  },
+  {
+    id: "1445662346538600647",
+    driveH: 8.4, driveKm: 799,
+    fly: { to: "Nice", h: 1.35, road: 34 },
+    img: "img/1445662346538600647.jpg",
+    title: "Villa Californiène — piscine",
+    city: "La Gaude",
+    region: "Côte d'Azur",
+    url: "https://www.airbnb.fr/rooms/1445662346538600647?check_in=2026-08-02&check_out=2026-08-08&guests=1&adults=7&children=3",
+    price: 5072,
+    checkin: "2026-08-02", checkout: "2026-08-08",
+    guests: 10, bedrooms: 5, baths: "3,5",
+    rating: "4,43",
+    lat: 43.70328, lng: 7.16556,
+    perks: ["piscine", "jacuzzi", "jardin"]
+  },
+  {
+    id: "1049865221875697520",
+    driveH: 6.2, driveKm: 579,
+    fly: { to: "Marseille", h: 1.15, road: 66 },
+    img: "img/1049865221875697520.jpg",
+    title: "Mais Anastasia",
+    city: "Les Baux-de-Provence",
+    region: "Provence — Alpilles",
+    url: "https://www.airbnb.fr/rooms/1049865221875697520?check_in=2026-08-01&check_out=2026-08-08&guests=1&adults=7&children=3",
+    price: 4951,
+    checkin: "2026-08-01", checkout: "2026-08-08",
+    guests: 12, bedrooms: 5, baths: "3",
+    rating: "4,44",
+    lat: 43.7504, lng: 4.7736,
+    perks: ["piscine", "jardin"]
+  },
+  {
+    id: "1686083748717697302",
+    driveH: 7.0, driveKm: 621,
+    fly: { to: "Lyon", h: 1.1, road: 78 },
+    img: "img/1686083748717697302.jpg",
+    title: "Château de Barral — piscine privée",
+    city: "Tersanne",
+    region: "Drôme — collines",
+    url: "https://www.airbnb.fr/rooms/1686083748717697302?check_in=2026-08-02&check_out=2026-08-09&guests=1&adults=7&children=3",
+    price: 4815,
+    checkin: "2026-08-02", checkout: "2026-08-09",
+    guests: 15, bedrooms: 7, baths: "2",
+    rating: "4,76",
+    lat: 45.2433, lng: 5.0176,
+    perks: ["château", "piscine", "jardin", "barbecue", "ping-pong"]
+  },
+  {
+    id: "1393632297652625323",
+    driveH: 7.4, driveKm: 688,
+    fly: { to: "Genève", h: 1.35, road: 48 },
+    img: "img/1393632297652625323.jpg",
+    title: "Maison idéalement placée — Annecy",
+    city: "Annecy",
+    region: "Alpes",
+    url: "https://www.airbnb.fr/rooms/1393632297652625323?check_in=2026-08-02&check_out=2026-08-09&guests=1&adults=7&children=3",
+    price: null, // ne s'affichait pas — à vérifier sur Airbnb
+    checkin: "2026-08-02", checkout: "2026-08-09",
+    guests: 12, bedrooms: 6, baths: "3",
+    rating: "5,0",
+    lat: 45.9389, lng: 6.1219,
+    perks: ["piscine", "jacuzzi", "jardin", "lac d'Annecy"]
+  },
+  {
+    id: "47475561",
+    driveH: 8.8, driveKm: 773,
+    img: "img/47475561.jpg",
+    title: "Mil8 — chalet de luxe de designer",
+    city: "Montvalezan (La Rosière)",
+    region: "Alpes",
+    url: "https://www.airbnb.fr/rooms/47475561?check_in=2026-08-01&check_out=2026-08-08&guests=1&adults=7&children=3",
+    price: 4751,
+    checkin: "2026-08-01", checkout: "2026-08-08",
+    guests: 10, bedrooms: 4, baths: "4",
+    rating: "4,93",
+    lat: 45.62805, lng: 6.84646,
+    perks: ["piscine", "sauna", "cheminée", "parking"]
+  },
+  {
+    id: "1575960860659664357",
+    driveH: 8.2, driveKm: 735,
+    fly: { to: "Genève", h: 1.35, road: 89 },
+    img: "img/1575960860659664357.jpg",
+    title: "Luxe à Megève — proche pistes",
+    city: "Megève",
+    region: "Alpes",
+    url: "https://www.airbnb.fr/rooms/1575960860659664357?check_in=2026-08-02&check_out=2026-08-10&guests=1&adults=7&children=3",
+    price: 5498, // pour 8 nuits (2 → 10 août)
+    checkin: "2026-08-02", checkout: "2026-08-10",
+    guests: 10, bedrooms: 4, baths: "4",
+    rating: "5,0",
+    lat: 45.8483, lng: 6.6342,
+    perks: ["piscine", "cheminée", "parking", "appartement"]
+  },
+  {
+    id: "1358054817206183309",
+    driveH: 7.6, driveKm: 699,
+    fly: { to: "Lyon", h: 1.1, road: 95 },
+    img: "img/1358054817206183309.jpg",
+    title: "Le Fort Royal — piscine privée intérieure",
+    city: "Albertville",
+    region: "Alpes",
+    url: "https://www.airbnb.fr/rooms/1358054817206183309?check_in=2026-08-01&check_out=2026-08-09&guests=1&adults=7&children=3",
+    price: null, // ne s'affichait pas — à vérifier sur Airbnb
+    checkin: "2026-08-01", checkout: "2026-08-09",
+    guests: 15, bedrooms: 4, baths: "3",
+    rating: "4,0",
+    lat: 45.67317, lng: 6.37573,
+    perks: ["château", "piscine intérieure", "jacuzzi", "ping-pong", "parking"]
+  },
+  {
+    id: "49334151",
+    driveH: 9.7, driveKm: 927,
+    fly: { to: "Strasbourg", h: 1.45, road: 25 },
+    img: "img/49334151.jpg",
+    title: "Gîte « La tabatière » — proche Europa-Park",
+    city: "Sermersheim",
+    region: "Alsace",
+    url: "https://www.airbnb.fr/rooms/49334151?check_in=2026-08-01&check_out=2026-08-09&guests=1&adults=7&children=3",
+    price: null, // ne s'affichait pas — à vérifier sur Airbnb
+    checkin: "2026-08-01", checkout: "2026-08-09",
+    guests: 12, bedrooms: 4, baths: "2,5",
+    rating: "4,8",
+    lat: 48.34363, lng: 7.55231,
+    perks: ["piscine", "clim", "jardin", "proche Europa-Park"]
+  },
+  {
+    id: "853557096646556864",
+    driveH: 2.3, driveKm: 199,
+    img: "img/853557096646556864.jpg",
+    title: "Maison 14 personnes avec piscine — Marais poitevin",
+    city: "Saint-Hilaire-la-Palud",
+    region: "Marais poitevin",
+    url: "https://www.airbnb.fr/rooms/853557096646556864?check_in=2026-08-01&check_out=2026-08-08&guests=1&adults=7&children=3",
+    price: 4114,
+    checkin: "2026-08-01", checkout: "2026-08-08",
+    guests: 14, bedrooms: 4, baths: "?",
+    rating: "",
+    lat: 46.2637, lng: -0.7103,
+    perks: ["piscine", "barbecue", "pétanque"]
   }
 ];
 const BUDGET_MAX = 4500;

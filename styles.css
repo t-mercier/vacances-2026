@@ -99,7 +99,20 @@ main {
   display: flex; align-items: center; justify-content: center; font-size: 3rem;
   background: linear-gradient(135deg, #f3e8ff, #ffe4ef 50%, #fff1dc);
 }
-.badge-row { display: flex; align-items: center; gap: .5rem; }
+.badge-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.card { position: relative; }
+.btn-hide {
+  position: absolute; top: .6rem; right: .6rem; z-index: 5;
+  border: none; border-radius: 999px; width: 2rem; height: 2rem;
+  background: rgba(255,255,255,.85); backdrop-filter: blur(4px);
+  font-size: .95rem; cursor: pointer; opacity: 0; transition: opacity .15s, transform .12s;
+}
+.card:hover .btn-hide { opacity: 1; }
+.btn-hide:hover { transform: scale(1.12); }
+.fav-badge {
+  font-size: .76rem; padding: .18rem .65rem; border-radius: 999px; font-weight: 700;
+  background: #fff7cc; color: #a16207; border: 1px solid #fde68a;
+}
 .crown { font-size: 1.05rem; }
 .region-badge {
   font-size: .76rem; padding: .18rem .65rem; border-radius: 999px; font-weight: 700;
@@ -114,6 +127,9 @@ main {
 .price.over { color: var(--orange); }
 .price.unknown { color: var(--muted); font-weight: 600; font-size: .95rem; }
 .dates { color: var(--muted); font-size: .85rem; }
+.trips { display: flex; flex-wrap: wrap; gap: .35rem .9rem; font-size: .86rem; }
+.trip { font-weight: 600; color: var(--ink); white-space: nowrap; }
+.trip em { font-style: normal; font-weight: 400; color: var(--muted); }
 .perks { display: flex; flex-wrap: wrap; gap: .3rem; }
 .perk {
   font-size: .8rem; background: var(--bg); border: 1px solid var(--line);
