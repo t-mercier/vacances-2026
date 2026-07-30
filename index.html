@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏖️</text></svg>">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <header>
@@ -20,7 +20,7 @@
     </div>
     <p class="sub">Semaine du 1<sup>er</sup>–9 août · 7 adultes + 4 enfants · budget ~4 500 €.
       ❤️ vote pour tes préférés, 📝 laisse des notes, puis <button class="linklike" id="btn-share">partage ton vote</button> aux autres.<br>
-      <small>🚗 temps de route depuis Bordeaux, hors bouchons d'août · ✈️ uniquement les lignes directes depuis Bordeaux, transfert jusqu'au logement compris · 🧭 sur chaque carte, ce qu'il y a autour — 👶 pour les enfants, 🍷 pour les adultes.</small></p>
+      <small>🚗 temps de route depuis Bordeaux et Lyon, hors bouchons d'août · ✈️ uniquement les lignes directes depuis Bordeaux, transfert jusqu'au logement compris · 🧭 sur chaque carte, ce qu'il y a autour — 👶 pour les enfants, 🍷 pour les adultes.</small></p>
   </header>
 
   <nav class="toolbar">
@@ -30,7 +30,8 @@
         <option value="none">Tri : ordre de la liste</option>
         <option value="votes">Tri : ❤️ votes</option>
         <option value="price">Tri : prix ↑</option>
-        <option value="drive">Tri : 🚗 route ↑</option>
+        <option value="drive">Tri : 🚗 route Bordeaux ↑</option>
+        <option value="lyon">Tri : 🚗 route Lyon ↑</option>
         <option value="rating">Tri : note Airbnb</option>
       </select>
       <button id="btn-view-map" class="btn">🗺️ Carte</button>
@@ -47,7 +48,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
-  <script src="listings.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="listings.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

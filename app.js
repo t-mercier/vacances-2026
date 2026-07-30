@@ -85,18 +85,20 @@ function priceHtml(l) {
 }
 function regions() { return ["Toutes", VOTED_CHIP, FAV_CHIP, ...new Set(all().map(l => l.region))]; }
 
-/* Trajet depuis Bordeaux. Temps de route OSRM (hors bouchons d'août).
+/* Trajets depuis Bordeaux et Lyon. Temps de route OSRM (hors bouchons d'août).
    L'avion n'est affiché que s'il existe une ligne directe depuis Bordeaux ;
    le transfert aéroport→logement est compté, sinon le chiffre ne veut rien dire. */
 const mins = t => t < 60 ? `${t} min`
   : `${Math.floor(t / 60)} h${t % 60 ? " " + String(t % 60).padStart(2, "0") : ""}`;
 const hm = h => mins(Math.round(h * 60));
 function travelHtml(l) {
-  const car = l.driveH != null
-    ? `<span class="trip">🚗 ${hm(l.driveH)} <em>· ${l.driveKm} km</em></span>` : "";
+  const bx = l.driveH != null
+    ? `<span class="trip">🚗 <b>Bordeaux</b> ${hm(l.driveH)} <em>· ${l.driveKm} km</em></span>` : "";
+  const ly = l.lyonH != null
+    ? `<span class="trip">🚗 <b>Lyon</b> ${hm(l.lyonH)} <em>· ${l.lyonKm} km</em></span>` : "";
   const air = l.fly
     ? `<span class="trip">✈️ ${hm(l.fly.h)} → ${esc(l.fly.to)} <em>+ ${mins(l.fly.road)} de route</em></span>` : "";
-  return car || air ? `<div class="trips">${car}${air}</div>` : "";
+  return bx || ly || air ? `<div class="trips">${bx}${ly}${air}</div>` : "";
 }
 
 function renderChips() {
@@ -112,6 +114,7 @@ function sorted(list) {
   return [...list].sort((a, b) =>
     mode === "price" ? (a.price ?? 1e9) - (b.price ?? 1e9) :
     mode === "drive" ? (a.driveH ?? 99) - (b.driveH ?? 99) :
+    mode === "lyon" ? (a.lyonH ?? 99) - (b.lyonH ?? 99) :
     mode === "votes" ? v(b) - v(a) : r(b) - r(a));
 }
 
