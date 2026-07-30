@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- La liste bouge souvent : on interdit la mise en cache de la page. -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Vacances 2026 — le vote 🏖️</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏖️</text></svg>">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -48,7 +52,18 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
-  <script src="listings.js?v=8"></script>
-  <script src="app.js?v=8"></script>
+  <!-- Chargement horodaté : chacun voit toujours la dernière liste, sans avoir à vider son cache. -->
+  <script>
+    (function () {
+      var t = Date.now();
+      function load(src, next) {
+        var s = document.createElement('script');
+        s.src = src + '?t=' + t;
+        s.onload = next || null;
+        document.body.appendChild(s);
+      }
+      load('listings.js', function () { load('app.js'); });
+    })();
+  </script>
 </body>
 </html>
