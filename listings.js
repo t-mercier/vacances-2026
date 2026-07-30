@@ -4,6 +4,7 @@
 const LISTINGS = [
   {
     id: "31921420",
+    img: "img/31921420.jpg",
     title: "Gîte de charme — vue exceptionnelle & spa",
     city: "Montréal-les-Sources",
     region: "Drôme provençale",
@@ -17,6 +18,7 @@ const LISTINGS = [
   },
   {
     id: "1170421735447933869",
+    img: "img/1170421735447933869.jpg",
     title: "Villa l'Arbanaise — vue mer, presqu'île de Giens",
     city: "Hyères",
     region: "Var — côte",
@@ -30,6 +32,7 @@ const LISTINGS = [
   },
   {
     id: "1739140052901104186",
+    img: "img/1739140052901104186.jpg",
     title: "Villa d'architecte avec piscine privée",
     city: "Six-Fours-les-Plages",
     region: "Var — côte",
@@ -43,6 +46,7 @@ const LISTINGS = [
   },
   {
     id: "919375358132572747",
+    img: "img/919375358132572747.jpg",
     title: "Anatole — cadre idyllique avec piscine",
     city: "Les Angles (face Avignon)",
     region: "Gard / Avignon",
@@ -56,6 +60,7 @@ const LISTINGS = [
   },
   {
     id: "1000703526294624122",
+    img: "img/1000703526294624122.jpg",
     title: "Villa à Grasse — piscine, vieille ville à pied",
     city: "Grasse",
     region: "Côte d'Azur",
@@ -69,6 +74,7 @@ const LISTINGS = [
   },
   {
     id: "8979070",
+    img: "img/8979070.jpg",
     title: "Maison hypercentre — clim, piscine, pétanque",
     city: "Aix-en-Provence",
     region: "Provence — Aix",
@@ -82,6 +88,7 @@ const LISTINGS = [
   },
   {
     id: "546681176260395984",
+    img: "img/546681176260395984.jpg",
     title: "Chalet vallée de Chamonix — piscine, spa, sauna, salle de sport",
     city: "Servoz",
     region: "Alpes — Chamonix",
@@ -95,6 +102,7 @@ const LISTINGS = [
   },
   {
     id: "43332322",
+    img: "img/43332322.jpg",
     title: "Villa contemporaine — piscine chauffée",
     city: "Saint-Cyr-sur-Mer",
     region: "Var — côte",
@@ -108,6 +116,7 @@ const LISTINGS = [
   },
   {
     id: "54143335",
+    img: "img/54143335.jpg",
     title: "Le Majestic Mind — vue mer d'exception",
     city: "La Grande-Motte",
     region: "Occitanie — mer",
@@ -121,6 +130,7 @@ const LISTINGS = [
   },
   {
     id: "857816540820477764",
+    img: "img/857816540820477764.jpg",
     title: "Mas le Garric — lieu éco-responsable",
     city: "Nîmes",
     region: "Gard / Avignon",
@@ -134,6 +144,7 @@ const LISTINGS = [
   },
   {
     id: "9357886",
+    img: "img/9357886.jpg",
     title: "La Salamandre Bleue",
     city: "Chantemerle-lès-Grignan",
     region: "Drôme provençale",
@@ -147,6 +158,7 @@ const LISTINGS = [
   },
   {
     id: "619372808921130995",
+    img: "img/619372808921130995.jpg",
     title: "Villa La Rodina — usage exclusif, 12 personnes",
     city: "Diano Marina",
     region: "Italie — Ligurie",
@@ -159,4 +171,4 @@ const LISTINGS = [
     perks: ["piscine", "jacuzzi", "clim", "jardin", "barbecue", "parking"]
   }
 ];
-const BUDGET_MAX = 5500;
+const BUDGET_MAX = 4500;

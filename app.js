@@ -116,6 +116,8 @@ function render() {
     const isWinner = maxVotes > 0 && vs.length === maxVotes;
     return `
     <article class="card ${isWinner ? "winner" : ""}" data-id="${esc(l.id)}">
+      ${l.img ? `<img class="card-img" src="${esc(l.img)}" alt="${esc(l.title)}" loading="lazy">`
+              : `<div class="card-img placeholder" aria-hidden="true">🏡</div>`}
       <div class="badge-row">
         <span class="region-badge" style="${regionStyle(l.region)}">📍 ${esc(l.region)}</span>
         ${isWinner ? '<span class="crown" title="en tête des votes">👑</span>' : ""}
