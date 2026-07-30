@@ -100,19 +100,6 @@ main {
   background: linear-gradient(135deg, #f3e8ff, #ffe4ef 50%, #fff1dc);
 }
 .badge-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
-.card { position: relative; }
-.btn-hide {
-  position: absolute; top: .6rem; right: .6rem; z-index: 5;
-  border: none; border-radius: 999px; width: 2rem; height: 2rem;
-  background: rgba(255,255,255,.85); backdrop-filter: blur(4px);
-  font-size: .95rem; cursor: pointer; opacity: 0; transition: opacity .15s, transform .12s;
-}
-.card:hover .btn-hide { opacity: 1; }
-.btn-hide:hover { transform: scale(1.12); }
-.fav-badge {
-  font-size: .76rem; padding: .18rem .65rem; border-radius: 999px; font-weight: 700;
-  background: #fff7cc; color: #a16207; border: 1px solid #fde68a;
-}
 .crown { font-size: 1.05rem; }
 .region-badge {
   font-size: .76rem; padding: .18rem .65rem; border-radius: 999px; font-weight: 700;
@@ -146,6 +133,16 @@ main {
 .btn-vote.voted { background: color-mix(in srgb, var(--pink) 12%, #fff); border-color: var(--pink); color: var(--pink); }
 .voters { color: var(--muted); font-size: .84rem; }
 
+/* ── Points d'intérêt ── */
+details.poi { border-top: 1.5px dashed var(--line); padding-top: .55rem; }
+details.poi summary { cursor: pointer; color: var(--teal); font-size: .88rem; font-weight: 600; }
+.poi-row {
+  display: flex; justify-content: space-between; gap: .8rem; align-items: baseline;
+  font-size: .86rem; padding: .28rem 0 .28rem .2rem;
+}
+.poi-row + .poi-row { border-top: 1px solid var(--line); }
+.poi-row em { font-style: normal; color: var(--muted); white-space: nowrap; font-size: .82rem; }
+
 /* ── Notes ── */
 details.notes { border-top: 1.5px dashed var(--line); padding-top: .55rem; }
 details.notes summary { cursor: pointer; color: var(--violet); font-size: .88rem; font-weight: 600; }
@@ -165,22 +162,6 @@ details.notes summary { cursor: pointer; color: var(--violet); font-size: .88rem
 .hidden { display: none !important; }
 .popup-title { font-weight: 700; margin-bottom: .2rem; }
 
-/* ── Dialog ── */
-dialog {
-  border: none; border-radius: var(--radius); padding: 1.6rem;
-  max-width: 34rem; width: 92vw; box-shadow: 0 24px 80px rgba(40, 20, 80, .28);
-}
-dialog::backdrop { background: rgba(28, 22, 40, .5); backdrop-filter: blur(3px); }
-dialog h2 { margin: 0 0 .9rem; font-size: 1.2rem; }
-dialog label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .6rem; font-weight: 600; }
-dialog input {
-  display: block; width: 100%; margin-top: .25rem; border: 1.5px solid var(--line);
-  border-radius: 10px; padding: .5rem .7rem; font-size: .95rem; outline: none;
-}
-dialog input:focus { border-color: var(--violet); }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .8rem; }
-.hint { font-size: .8rem; color: var(--muted); }
-dialog menu { display: flex; justify-content: flex-end; gap: .6rem; padding: 0; margin: .7rem 0 0; }
 
 footer { padding: 1rem 1.6rem 2.2rem; color: var(--muted); font-size: .85rem; }
 

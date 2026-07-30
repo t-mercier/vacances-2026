@@ -3,7 +3,7 @@
    encode tes votes/notes dans une URL ; l'ouvrir chez quelqu'un
    d'autre fusionne tes votes dans sa vue. Pas de backend. */
 
-const LS = { user: "hv_user", votes: "hv_votes", notes: "hv_notes", hidden: "hv_hidden" };
+const LS = { user: "hv_user", votes: "hv_votes", notes: "hv_notes" };
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
@@ -43,13 +43,12 @@ const perkLabel = p => {
 
 let votes = load(LS.votes, {});     // {listingId: [prenoms]}
 let notes = load(LS.notes, {});     // {listingId: [{who,text,ts}]}
-let hidden = load(LS.hidden, []);   // ids masqués par CET utilisateur (persiste en local)
 let region = "Toutes";
 let mapObj = null;
 
 const all = () => LISTINGS;
-const visible = () => all().filter(l => !hidden.includes(l.id));
 const FAV_CHIP = "\u{1F49B} Coups de c\u0153ur";
+const VOTED_CHIP = "\u2764\ufe0f Vot\u00e9s";
 const me = () => (document.getElementById("me-name").value || "").trim();
 
 /* ─── Fusion depuis une URL partagée (#d=…) ─── */
@@ -84,7 +83,7 @@ function priceHtml(l) {
   return `<span class="price ${over ? "over" : ""}">${l.price.toLocaleString("fr-FR")} €</span>` +
     (over ? ` <span class="dates">⚠ au-dessus des ${BUDGET_MAX.toLocaleString("fr-FR")} €</span>` : "");
 }
-function regions() { return ["Toutes", FAV_CHIP, ...new Set(all().map(l => l.region))]; }
+function regions() { return ["Toutes", VOTED_CHIP, FAV_CHIP, ...new Set(all().map(l => l.region))]; }
 
 /* Trajet depuis Bordeaux. Temps de route OSRM (hors bouchons d'août).
    L'avion n'est affiché que s'il existe une ligne directe depuis Bordeaux ;
@@ -109,17 +108,21 @@ function sorted(list) {
   const mode = document.getElementById("sort").value;
   const v = l => (votes[l.id] || []).length;
   const r = l => parseFloat(String(l.rating || "0").replace(",", "."));
+  if (mode === "none") return list;                       // ordre du fichier — les votes ne font pas remonter
   return [...list].sort((a, b) =>
     mode === "price" ? (a.price ?? 1e9) - (b.price ?? 1e9) :
     mode === "drive" ? (a.driveH ?? 99) - (b.driveH ?? 99) :
-    mode === "rating" ? r(b) - r(a) : v(b) - v(a));
+    mode === "votes" ? v(b) - v(a) : r(b) - r(a));
 }
 
 function render() {
   renderChips();
-  const list = sorted(visible().filter(l =>
-    region === "Toutes" ? true : region === FAV_CHIP ? l.fav : l.region === region));
-  const maxVotes = Math.max(0, ...visible().map(l => (votes[l.id] || []).length));
+  const list = sorted(all().filter(l =>
+    region === "Toutes" ? true
+      : region === VOTED_CHIP ? (votes[l.id] || []).length > 0
+      : region === FAV_CHIP ? l.fav
+      : l.region === region));
+  const maxVotes = Math.max(0, ...all().map(l => (votes[l.id] || []).length));
   document.getElementById("cards").innerHTML = list.map(l => {
     const vs = votes[l.id] || [];
     const ns = notes[l.id] || [];
@@ -129,7 +132,6 @@ function render() {
     <article class="card ${isWinner ? "winner" : ""}" data-id="${esc(l.id)}">
       ${l.img ? `<img class="card-img" src="${esc(l.img)}" alt="${esc(l.title)}" loading="lazy">`
               : `<div class="card-img placeholder" aria-hidden="true">🏡</div>`}
-      <button class="btn-hide" data-hide="${esc(l.id)}" title="Masquer ce bien (juste pour toi)">🙈</button>
       <div class="badge-row">
         <span class="region-badge" style="${regionStyle(l.region)}">📍 ${esc(l.region)}</span>
         ${l.fav ? '<span class="fav-badge" title="Élu Coup de cœur voyageurs par Airbnb">💛 Coup de cœur</span>' : ""}
@@ -144,6 +146,10 @@ function render() {
       <div class="price-row">${priceHtml(l)} <span class="dates">📅 ${fmtDates(l)}</span></div>
       ${travelHtml(l)}
       <div class="perks">${(l.perks || []).map(p => `<span class="perk">${esc(perkLabel(p))}</span>`).join("")}</div>
+      ${(l.poi || []).length ? `<details class="poi">
+        <summary>🧭 Autour du logement</summary>
+        ${l.poi.map(p => `<div class="poi-row"><span>${p.e} ${esc(p.n)}</span><em>${mins(p.m)}</em></div>`).join("")}
+      </details>` : ""}
       <div class="vote-row">
         <button class="btn-vote ${iVoted ? "voted" : ""}" data-vote="${esc(l.id)}">
           ${iVoted ? "❤️" : "🤍"} ${vs.length}</button>
@@ -162,10 +168,7 @@ function render() {
   }).join("");
   const voters = new Set(Object.values(votes).flat());
   document.getElementById("stats").textContent =
-    `${visible().length} biens · ${voters.size} votant·e·s (${[...voters].join(", ") || "personne"})`;
-  const unhide = document.getElementById("btn-unhide");
-  unhide.classList.toggle("hidden", hidden.length === 0);
-  unhide.textContent = `Réafficher ${hidden.length} bien${hidden.length > 1 ? "s" : ""} masqué${hidden.length > 1 ? "s" : ""}`;
+    `${all().length} biens · ${voters.size} votant·e·s (${[...voters].join(", ") || "personne"})`;
   if (mapObj) renderMarkers();
 }
 
@@ -183,7 +186,7 @@ function renderMarkers() {
   if (markerLayer) markerLayer.remove();
   markerLayer = L.layerGroup().addTo(mapObj);
   const pts = [];
-  for (const l of visible()) {
+  for (const l of all()) {
     if (l.lat == null || l.lng == null) continue;
     pts.push([l.lat, l.lng]);
     const vs = (votes[l.id] || []).length;
@@ -199,13 +202,6 @@ function renderMarkers() {
 document.addEventListener("click", e => {
   const chip = e.target.closest(".chip");
   if (chip) { region = chip.dataset.r; render(); return; }
-  const hideBtn = e.target.closest("[data-hide]");
-  if (hideBtn) {
-    hidden.push(hideBtn.dataset.hide); save(LS.hidden, hidden); render(); return;
-  }
-  if (e.target.id === "btn-unhide") {
-    hidden = []; save(LS.hidden, hidden); render(); return;
-  }
   const voteBtn = e.target.closest("[data-vote]");
   if (voteBtn) {
     const name = me();
@@ -254,8 +250,8 @@ document.getElementById("btn-share").addEventListener("click", async () => {
 
 document.getElementById("btn-reset").addEventListener("click", () => {
   if (!confirm("Effacer TES votes, notes et biens ajoutés (sur cet appareil) ?")) return;
-  localStorage.removeItem(LS.votes); localStorage.removeItem(LS.notes); localStorage.removeItem(LS.hidden);
-  votes = {}; notes = {}; hidden = []; render();
+  localStorage.removeItem(LS.votes); localStorage.removeItem(LS.notes);
+  votes = {}; notes = {}; render();
 });
 
 /* ─── Init ─── */
